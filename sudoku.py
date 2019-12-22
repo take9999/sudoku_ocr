@@ -44,8 +44,11 @@ def get_rect_sudoku(image_bgr, image_2chi):
 
 
 def split_cell(x, y, w, h, image_2chi):
+    if not os.path.exists('./cell_img'):
+        os.mkdir('./cell_img')
     shutil.rmtree('./cell_img')
     os.mkdir('./cell_img')
+
     row_size = int(h / 9)
     col_size = int(w / 9)
 
@@ -202,5 +205,6 @@ if __name__ == '__main__':
     png_list = glob.glob("./cell_img/*.png")
     for png_img in png_list:
         row, col, bool_val = png_img[-9:].replace(".png", "").split("_")
-        print(row, col, bool_val)
+        if bool_val == "t":
+            print(row, col, bool_val)
 
