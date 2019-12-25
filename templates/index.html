@@ -7,10 +7,20 @@
 </head>
 
 <body>
+    <form method=post action="/upload" enctype = multipart/form-data>
+        <p>
+            <input type=file name=file>
+            <input type=submit value=Upload>
+        </p>
+    </form>
     <div id="app" class="top_div">
         <div id="img_div" class="box">
-            <caption class="caption">アップロードした画像</caption>
-            <img src="./images/sudoku1.png">
+            <div>
+                <caption class="caption">アップロードした画像</caption>
+            </div>
+            <div>
+                <img src="./images/sudoku.png">
+            </div>
         </div>
         <div class="box">
             <caption class="caption">読み取ったナンプレ</caption>
@@ -27,7 +37,7 @@
                             v-else
                             :class="{ hole: masks[i][j] == 'X' }"
                         ><input type="text" id="edit" v-model="cell" @blur="blurCell" /></td>
-                    </tr>
+                    </tr>21
                 </tbody>
             </table>
         </div>
