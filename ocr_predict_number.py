@@ -3,6 +3,10 @@ import numpy as np
 import os
 import shutil
 import glob
+import pprint
+
+# tensorflow 1.13.1
+# keras 2.3.1
 
 from keras.datasets import mnist
 from keras.utils import to_categorical
@@ -25,7 +29,7 @@ def morphology(img):
     return morp_img
 
 
-def get_rect_sudoku(image_bgr, image_2chi):
+def get_rect_sudoku(image_bgr, image_2chi, target_path):
     image_bgr = cv2.copyMakeBorder(image_bgr, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=255)
     image_2chi = cv2.copyMakeBorder(image_2chi, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=255)
 
@@ -38,7 +42,7 @@ def get_rect_sudoku(image_bgr, image_2chi):
     if target_cnt is not None:
         x, y, w, h = cv2.boundingRect(target_cnt)
         img_con = cv2.rectangle(image_bgr, (x, y), (x + w, y + h), (0, 0, 255), 2)
-        cv2.imwrite(target + "_con.png", img_con)
+        cv2.imwrite(target_path + "_con.png", img_con)
 
     return x, y, w, h, image_bgr, image_2chi
 
@@ -79,22 +83,22 @@ def split_cell(x, y, w, h, image_2chi):
                 cv2.imwrite("cell_img/{}_{}_f.png".format(i+1, j+1), img_ij)
 
 
-def get99imgs(image):
-    img_bgr = cv2.imread(image)
+def get99imgs(image_path):
+    img_bgr = cv2.imread(image_path)
     img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
 
     # 二値化
     _, img_2chi = cv2.threshold(img_gray, 200, 255, cv2.THRESH_BINARY)
 
     # 数独表の抽出
-    t_x, t_y, t_w, t_h, img_bgr, img_2chi = get_rect_sudoku(img_bgr, img_2chi)
+    t_x, t_y, t_w, t_h, img_bgr, img_2chi = get_rect_sudoku(img_bgr, img_2chi, image_path)
 
     # 各セルの画像を取得
     split_cell(t_x, t_y, t_w, t_h, img_2chi)
 
 
-def predict_number(image):
-    img_cell = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+def predict_number(image_path):
+    img_cell = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     img_cell = cv2.bitwise_not(img_cell)
     img_cell = cv2.resize(img_cell, (28, 28))
 
@@ -191,20 +195,37 @@ def predict_number(image):
     # model.save("mnist_model.h5")
     model = load_model("mnist_cnn_model.h5")
 
-    # print(np.argmax(model.predict(img_cell)))
-    return np.argmax(model.predict(img_cell))
+    result = np.argmax(model.predict(img_cell))
+    print(result)
+    return result
+
+
+def get_ocr_result_list():
+    ocr_result_list = []
+
+    png_path_list = glob.glob("./cell_img/*.png")
+    now_row = 1
+    row_list = []
+    for png_path in sorted(png_path_list):
+        row, col, bool_val = png_path[-9:].replace(".png", "").split("_")
+        if now_row != row:
+            ocr_result_list.append(row_list)
+            row_list = []
+            now_row = row
+
+        if bool_val == "t":
+            row_list.append(str(predict_number(png_path)))
+        else:
+            row_list.append(".")
+    # last row append
+    ocr_result_list.append(row_list)
+
+    return ocr_result_list
 
 
 if __name__ == '__main__':
-    target = "sudoku.jpg"
-    target = "sudoku1.png"
+    target_path = "images/sudoku.png"
 
     # 画像から最大の四角形を検知し、9*9の各セルの画像を取得
-    get99imgs(target)
-
-    png_list = glob.glob("./cell_img/*.png")
-    for png_img in png_list:
-        row, col, bool_val = png_img[-9:].replace(".png", "").split("_")
-        if bool_val == "t":
-            print(row, col, bool_val)
-
+    get99imgs(target_path)
+    pprint.pprint(get_ocr_result_list())
