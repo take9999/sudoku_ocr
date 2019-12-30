@@ -1,19 +1,14 @@
+// https://qiita.com/Kazuya_Murakami/items/f5ef5fed850b8b9e7a81
+
+function is_not_Empty(obj){
+  return Object.keys(obj).length;
+}
+
 // 開発モード
 Vue.config.debug = false;
 
 // Vue.js devtools
 Vue.config.devtools = true;
-
-// 背景画像をランダムに表示
-var images = [
-    'bridge.jpg',
-    'flower.jpg',
-    'hokkaido.jpg',
-    'kouyou.jpg',
-    'newyork.jpg',
-    'setsugen.jpg'
-];
-document.body.style.backgroundImage = 'url(img/' +　images[Math.floor(Math.random() * images.length)] + ')';
 
 var cells = [];         // ナンプレテーブル
 var masks = [];         // 穴空けマスクテーブル
@@ -45,81 +40,27 @@ new Vue({
             cells.length = 0;
             masks.length = 0;
 
-            // ナンプレ作成
-            for (let i = 0; i < 9; i++) {
-                // 行候補初期化
-                row = '123456789';
+            axios.get('/solve')
+                .then(response => {
+                    console.log('status:', response.status); // 200
+                    console.log('body:', response.data);     // response body.
 
-                // 行追加
-                cells.push(new Array(9));
-
-                // 列追加
-                for (let j = 0; j < 9; j++) {
-                    // 列除外候補を収集
-                    col = '';
-                    for (let k = 0; k < i; k++)
-                        col += cells[k][j];
-
-                    // 箱除外候補を収集
-                    box = '';
-                    for (let k = i % 3; k > 0; k--) {
-                        box += cells[i - k][j - (j % 3)];
-                        box += cells[i - k][j - (j % 3) + 1];
-                        box += cells[i - k][j - (j % 3) + 2];
-                    }
-
-                    // 行候補 - 列除外候補 - 箱除外候補 = 最終候補
-                    choose = row;
-                    for (let n = 0; n < col.length; n++)
-                        choose = choose.replace(col.charAt(n), '');
-                    for (let m = 0; m < box.length; m++)
-                        choose = choose.replace(box.charAt(m), '');
-
-                    // 最終候補から乱数により数字を1つ選択
-                    let num = choose.charAt(Math.floor(Math.random() * choose.length));
-
-                    // 最終候補に何も残らなかった場合
-                    if (num == '') {
-                        // 10回リトライしても無理なら最初からやり直す
-                        if (retry > 10) {
-                            i = -1;
-                            cells.length = 0;
-                            retry = 0;
-                            break;
+                    if (is_not_Empty(response.data)) {
+                        for (let i=1; i<=9; i++){
+                            cells.push(response.data[i]);
                         }
-
-                        // 列追加をやり直す（10回までリトライ）
-                        j = -1;
-                        row = '123456789';
-                        retry++;
-                        continue;
                     }
 
-                    // 行候補から取り出してテーブルに反映する
-                    row = row.replace(num, '');
-                    cells[i][j] = parseInt(num);
-                }
-            }
-
-            // 穴空けマスク作成
-            for (let i = 0; i < 9; i++) {
-                // 行追加
-                masks.push(new Array(9));
-
-                // 穴空け
-                let hole = '012345678';
-                for (let n = 0; n < Math.floor(Math.random() * 8) + 2; n++)
-                    hole = hole.replace(hole.charAt(Math.floor(Math.random() * (9 - n))), '');
-                for (let m = 0; m < hole.length; m++)
-                    masks[i][hole.charAt(m)] = 'X';
-
-                // 列追加
-                for (let j = 0; j < 9; j++) {
-                    // 穴空け箇所 (X) はナンプレテーブルから数字を消去
-                    if (masks[i][j] == 'X')
-                        cells[i][j] = '';
-                }
-            }
+                    // 穴空けマスク作成(全てのマスを編集可能にする)
+                    for (let i = 0; i < 9; i++) {
+                        masks.push(new Array(9));
+                        for (let j = 0; j < 9; j++) {
+                            masks[i][j] = 'X';
+                        }
+                    }
+                }).catch(err => {
+                    console.log('err:', err);
+                });
         },
 
         // 穴空きセルがクリックされたとき
@@ -131,6 +72,7 @@ new Vue({
             // 穴空きセルなら入力モードへ
             if (masks[i][j] == 'X') {
                 Vue.set(isEdit[i], j, true);
+                cells[i][j] = '';
                 this.$nextTick(() => document.getElementById('edit').focus());
             }
         },
