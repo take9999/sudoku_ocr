@@ -13,6 +13,11 @@
             <input type=submit value=Upload>
         </p>
     </form>
+    <form method=post action="/solve">
+        <p>
+            <input type=submit value="解答を取得">
+        </p>
+    </form>
     <div id="app" class="top_div">
         <div id="img_div" class="box">
             <div>
@@ -37,7 +42,7 @@
                             v-else
                             :class="{ hole: masks[i][j] == 'X' }"
                         ><input type="text" id="edit" v-model="cell" @blur="blurCell" /></td>
-                    </tr>21
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -45,10 +50,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/static/js/script.js"></script>
-
-    <!-- 紙吹雪用 -->
-    <canvas id="canvas" ondblclick="window.location.reload()"></canvas>
-    <script src="/static/js/confetti.js"></script>
 </body>
 </html>
