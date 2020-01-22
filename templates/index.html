@@ -7,12 +7,14 @@
 </head>
 
 <body>
+    <!-- ナンプレ画像のアップロード -->
     <form method=post action="/upload" enctype = multipart/form-data>
         <p>
             <input type=file name=file>
             <input type=submit value=Upload>
         </p>
     </form>
+    <!-- 解答を取得 -->
     <form method=post action="/solve">
         <p>
             <input type=submit value="解答を取得">
@@ -46,7 +48,6 @@
                 </tbody>
             </table>
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>

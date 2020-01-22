@@ -34,8 +34,8 @@ def main_page():
     return render_template("index.html")
 
 
-@app.route("/post_solve", methods=["POST"])
-def solve_sudoku():
+@app.route("/solve", methods=["POST"])
+def post_solve():
     text_file_path = "ocr_text/ocr_text.txt"
     result_json = {}
     if os.path.exists(text_file_path):
@@ -52,7 +52,7 @@ def solve_sudoku():
 
 
 @app.route("/get_ocr_text", methods=["GET"])
-def solve_sudoku():
+def get_ocr_text():
     text_file_path = "ocr_text/ocr_text.txt"
     result_json = {}
     if os.path.exists(text_file_path):

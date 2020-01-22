@@ -41,7 +41,7 @@ def get_rect_sudoku(image_bgr, image_2chi, target_path):
 
     if target_cnt is not None:
         x, y, w, h = cv2.boundingRect(target_cnt)
-        img_con = cv2.rectangle(image_bgr, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        img_con = cv2.rectangle(image_bgr, (x, y), (x + w, y + h), (0, 0, 255), 1)
         cv2.imwrite(target_path + "_con.png", img_con)
 
     return x, y, w, h, image_bgr, image_2chi
@@ -67,8 +67,8 @@ def split_cell(x, y, w, h, image_2chi):
             img_ij = image_2chi[start_y:end_y, start_x:end_x]
             h_ij, w_ij = img_ij.shape[:2]
 
-            # 周囲15%を白色化
-            del_space = int(h_ij * 15/100)
+            # 周囲を白色化
+            del_space = int(h_ij * 15/100)  # %を白色化
             img_ij[0:del_space, 0:w_ij] = 255
             img_ij[h_ij-del_space:h, 0:w_ij] = 255
             img_ij[0:h_ij, 0:del_space] = 255
@@ -213,10 +213,10 @@ def get_ocr_result_list():
             row_list = []
             now_row = row
 
-        if bool_val == "t":
+        if bool_val == 't':
             row_list.append(str(predict_number(png_path)))
         else:
-            row_list.append(".")
+            row_list.append('.')
     # last row append
     ocr_result_list.append(row_list)
 
@@ -224,7 +224,7 @@ def get_ocr_result_list():
 
 
 if __name__ == '__main__':
-    target_path = "images/sudoku.png"
+    target_path = "images/sudoku5.png"
 
     # 画像から最大の四角形を検知し、9*9の各セルの画像を取得
     get99imgs(target_path)

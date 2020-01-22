@@ -40,7 +40,7 @@ new Vue({
             cells.length = 0;
             masks.length = 0;
 
-            axios.get('/solve')
+            axios.get('/get_ocr_text')
                 .then(response => {
                     console.log('status:', response.status); // 200
                     console.log('body:', response.data);     // response body.
