@@ -68,6 +68,7 @@ def check3x3(vdata, col, row, val):
     return not val in u
 
 
-# 結果表示
-print("--- 完成データ ---")
-set_num(data, 0)
+if __name__ == "__main__":
+    # 結果表示
+    print("--- 完成データ ---")
+    set_num(data, 0)
