@@ -19,6 +19,7 @@ var col = '';           // 列除外候補
 var box = '';           // 箱除外候補
 var choose = '';        // 最終候補
 var retry = 0;          // リトライカウント
+var progress = 0;       // OCR進捗状況(パーセンテージ)
 
 // 編集中フラグの初期化
 for(let e = 0; e < 9; e++)
@@ -31,37 +32,39 @@ new Vue({
         cells: cells,
         masks: masks,
         isEdit: isEdit,
-        isClear: isClear
+        isClear: isClear,
+        progress: progress
+    },
+    mounted() {
+        // テーブル初期化
+        cells.length = 0;
+        masks.length = 0;
+
+        axios.get('/get_ocr_text')
+            .then(response => {
+                console.log('status:', response.status); // 200
+                console.log('body:', response.data);     // response body.
+
+                this.progress = response.data[99];
+
+                if (is_not_Empty(response.data)) {
+                    for (let i=1; i<=9; i++){
+                        cells.push(response.data[i]);
+                    }
+                }
+
+                // 穴空けマスク作成(全てのマスを編集可能にする)
+                for (let i = 0; i < 9; i++) {
+                    masks.push(new Array(9));
+                    for (let j = 0; j < 9; j++) {
+                        masks[i][j] = 'X';
+                    }
+                }
+        }).catch(err => {
+            console.log('err:', err);
+        });
     },
     methods: {
-        // ページが読み込まれたとき
-        window:onload = function() {
-            // テーブル初期化
-            cells.length = 0;
-            masks.length = 0;
-
-            axios.get('/get_ocr_text')
-                .then(response => {
-                    console.log('status:', response.status); // 200
-                    console.log('body:', response.data);     // response body.
-
-                    if (is_not_Empty(response.data)) {
-                        for (let i=1; i<=9; i++){
-                            cells.push(response.data[i]);
-                        }
-                    }
-
-                    // 穴空けマスク作成(全てのマスを編集可能にする)
-                    for (let i = 0; i < 9; i++) {
-                        masks.push(new Array(9));
-                        for (let j = 0; j < 9; j++) {
-                            masks[i][j] = 'X';
-                        }
-                    }
-                }).catch(err => {
-                    console.log('err:', err);
-                });
-        },
         // 穴空きセルがクリックされたとき
         clickCell: function(event) {
             // セル番地を取得

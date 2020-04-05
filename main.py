@@ -6,6 +6,8 @@ from ocr_predict_number import get99imgs, get_ocr_result_list
 import csv
 from flask_cors import CORS
 import pprint
+import threading
+import glob
 
 from solve_sudoku import set_num
 
@@ -29,13 +31,25 @@ app.config['TEXT_FOLDER'] = TEXT_FOLDER
 
 # file形式の確認
 def allowed_file(filename):
-
-    # .があるかどうかの確認
-    # 想定された拡張子かどうかの確認
+    # .があるかどうかの確認 and 想定された拡張子かどうかの確認
     if '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
         return True
     else:
         return False
+
+
+# OCR処理実行
+def do_ocr():
+    ocr_list = get_ocr_result_list()
+
+    # TODO 空白行除去(ocr_list)
+
+    # osr_listを出力
+    ocr_filename = "ocr_text.txt"
+    ocr_file_path = os.path.join(app.config['TEXT_FOLDER'], ocr_filename)
+    with open(ocr_file_path, mode="w") as wf:
+        writer = csv.writer(wf)
+        writer.writerows(ocr_list)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -79,6 +93,13 @@ def get_ocr_text():
     ocr_filename = "ocr_text.txt"
     ocr_file_path = os.path.join(app.config['TEXT_FOLDER'], ocr_filename)
     result_json = {}
+
+    # 処理進捗度を返す
+    png_path_list = glob.glob("./cell_img/*.png")
+    progress = int(len(png_path_list)/81 * 100)
+
+    result_json[99] = progress
+
     if os.path.exists(ocr_file_path):
         with open(ocr_file_path, mode="r") as rf:
             i = 1
@@ -89,7 +110,7 @@ def get_ocr_text():
             print(result_json)
         return jsonify(result_json)
     else:
-        return jsonify({})
+        return jsonify(result_json)
 
 
 @app.route("/upload", methods=["POST"])
@@ -110,23 +131,20 @@ def upload_img():
 
             # アップロードファイルの内容チェック
             if file and allowed_file(file.filename):
-                # アップロードファイルの保存
+                # ファイルの保存
                 filename = "sudoku.png"  # 'sudoku.png'という名前で保存（上書き）
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
 
-                # アップロードファイルのOCR処理実行
+                # 数独エリアを画像として取得
                 get99imgs(file_path)
-                ocr_list = get_ocr_result_list()
 
-                # TODO 空白行除去(ocr_list)
+                # マルチスレッドでOCR処理(バックグラウンド処理)
+                run_in_bg = threading.Thread(target=do_ocr, name='do_ocr')
+                thread_names = [t.name for t in threading.enumerate() if isinstance(t, threading.Thread)]
 
-                # osr_listを出力
-                ocr_filename = "ocr_text.txt"
-                ocr_file_path = os.path.join(app.config['TEXT_FOLDER'], ocr_filename)
-                with open(ocr_file_path, mode="w") as wf:
-                    writer = csv.writer(wf)
-                    writer.writerows(ocr_list)
+                if 'do_ocr' not in thread_names:
+                    run_in_bg.start()
 
                 return render_template("index.html")
     else:

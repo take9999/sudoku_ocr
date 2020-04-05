@@ -74,10 +74,13 @@ def split_cell(x, y, w, h, image_2chi):
             img_ij[0:h_ij, 0:del_space] = 255
             img_ij[0:h_ij, w_ij-del_space:w_ij] = 255
 
-            area_white_pixels = cv2.countNonZero(img_ij)
-            area_all_pixels = img_ij.shape[0] * img_ij.shape[1]
+            # 画像の中央部分に黒色文字がある場合のみ数字が書かれていると判定する
+            img_center = img_ij[int(h_ij*30/100): int(h_ij*70/100), int(w_ij*30/100): int(w_ij*70/100)]
+            area_white_pixels = cv2.countNonZero(img_center)
+            area_all_pixels = img_center.shape[0] * img_center.shape[1]
             area_black_pixels = area_all_pixels - area_white_pixels
-            if area_black_pixels >= 30:  # 文字が書かれている場合
+
+            if area_black_pixels >= 10:  # 文字が書かれている場合
                 cv2.imwrite("cell_img/{}_{}_t.png".format(i+1, j+1), img_ij)
             else:
                 cv2.imwrite("cell_img/{}_{}_f.png".format(i+1, j+1), img_ij)
