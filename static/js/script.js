@@ -62,7 +62,6 @@ new Vue({
                     console.log('err:', err);
                 });
         },
-
         // 穴空きセルがクリックされたとき
         clickCell: function(event) {
             // セル番地を取得
@@ -76,7 +75,6 @@ new Vue({
                 this.$nextTick(() => document.getElementById('edit').focus());
             }
         },
-
         // 穴空きセルの入力が終了したとき
         blurCell: function(event) {
             // セル番地を取得
@@ -118,12 +116,23 @@ new Vue({
                 if (sum != 45)
                     clear = false;
             }
-
             // クリア効果
             if (clear) {
                 this.isClear = true;
                 document.getElementById('canvas').style.display = 'block';
             }
+        },
+        //解答を取得ボタンが押されたとき
+        clickSolve: function(event){
+            axios.post('/post_solve', {
+                cells: cells
+            })
+            .then(function (response) {
+                console.log(response);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
         }
     }
 })

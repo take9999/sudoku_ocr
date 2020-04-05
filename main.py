@@ -5,17 +5,21 @@ from flask import Flask, request, render_template, send_from_directory, jsonify
 from ocr_predict_number import get99imgs, get_ocr_result_list
 import csv
 from flask_cors import CORS
+import pprint
 
-# アップロードされる拡張子の制限
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'gif'])
+from solve_sudoku import set_num
 
 app = Flask(__name__)
-CORS(app)  # <-追加
+CORS(app)
+
+# アップロードされる拡張子の制限
+ALLOWED_EXTENSIONS = ('png', 'jpg', 'gif')
 
 UPLOAD_FOLDER = "./images"
+TEXT_FOLDER = "./ocr_text"
+
 if not os.path.isdir(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
-TEXT_FOLDER = "./ocr_text"
 if not os.path.isdir(TEXT_FOLDER):
     os.mkdir(TEXT_FOLDER)
 
@@ -23,10 +27,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['TEXT_FOLDER'] = TEXT_FOLDER
 
 
+# file形式の確認
 def allowed_file(filename):
-    # .があるかどうかのチェックと、拡張子の確認
-    # OKなら１、だめなら0
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+    # .があるかどうかの確認
+    # 想定された拡張子かどうかの確認
+    if '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS:
+        return True
+    else:
+        return False
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -34,29 +43,44 @@ def main_page():
     return render_template("index.html")
 
 
-@app.route("/solve", methods=["POST"])
+@app.route("/post_solve", methods=["POST"])
 def post_solve():
-    text_file_path = "ocr_text/ocr_text.txt"
-    result_json = {}
-    if os.path.exists(text_file_path):
-        with open(text_file_path, mode="r") as rf:
-            i = 1
-            for read_line in rf.readlines():
-                if len(read_line) == 18:
-                    result_json[i] = read_line.replace("\n", "").split(",")
-                    i = i + 1
-            print(result_json)
-        return jsonify(result_json)
-    else:
-        return jsonify({})
+    ocr_filename = "ocr_text.txt"
+    ocr_file_path = os.path.join(app.config['TEXT_FOLDER'], ocr_filename)
+
+    data = []
+    with open(ocr_file_path, "rt") as f:
+        for row in f.readlines():
+            row = row.rstrip("\n")
+            r = []
+            if len(row) != 0:
+                for v in row.split(","):
+                    try:
+                        r.append(int(v.strip()))
+                    except:
+                        r.append(0)
+                data += [r]
+
+    print("--- 問題データ ---")
+    pprint.pprint(data)
+
+    set_num(data, 0)
+
+    ocr_filename = "ocr_text_solve.txt"
+    ocr_file_path = os.path.join(app.config['TEXT_FOLDER'], ocr_filename)
+
+    # TODO solveファイルを読んで、listを画面に返して表示する処理
+
+    return 0
 
 
 @app.route("/get_ocr_text", methods=["GET"])
 def get_ocr_text():
-    text_file_path = "ocr_text/ocr_text.txt"
+    ocr_filename = "ocr_text.txt"
+    ocr_file_path = os.path.join(app.config['TEXT_FOLDER'], ocr_filename)
     result_json = {}
-    if os.path.exists(text_file_path):
-        with open(text_file_path, mode="r") as rf:
+    if os.path.exists(ocr_file_path):
+        with open(ocr_file_path, mode="r") as rf:
             i = 1
             for read_line in rf.readlines():
                 if len(read_line) == 18:
@@ -73,36 +97,40 @@ def upload_img():
     # リクエストがポストかどうかの判別
     if request.method == 'POST':
 
-        # ファイルがなかった場合の処理
+        # requestにアップロードファイルが付与されていなかった場合は、TOPページへ戻す
         if 'file' not in request.files:
             return render_template("index.html")
         else:
             # データの取り出し
             file = request.files['file']
 
-            # ファイル名がなかった時の処理
+            # ファイル名が無かった場合は、TOPページへ戻す
             if file.filename == '':
                 return render_template("index.html")
 
-            # ファイルのチェック
+            # アップロードファイルの内容チェック
             if file and allowed_file(file.filename):
-                # ファイルの保存
-                filename = "sudoku.png"
+                # アップロードファイルの保存
+                filename = "sudoku.png"  # 'sudoku.png'という名前で保存（上書き）
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
 
-                # sudoku画像のocr実行
+                # アップロードファイルのOCR処理実行
                 get99imgs(file_path)
                 ocr_list = get_ocr_result_list()
 
+                # TODO 空白行除去(ocr_list)
+
                 # osr_listを出力
-                output_file_path = "ocr_text/ocr_text.txt"
-                with open(output_file_path, mode="w") as wf:
+                ocr_filename = "ocr_text.txt"
+                ocr_file_path = os.path.join(app.config['TEXT_FOLDER'], ocr_filename)
+                with open(ocr_file_path, mode="w") as wf:
                     writer = csv.writer(wf)
                     writer.writerows(ocr_list)
 
-                # アップロード後のページに転送
                 return render_template("index.html")
+    else:
+        return render_template("index.html")
 
 
 @app.route('/images/<path:path>')

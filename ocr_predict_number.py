@@ -107,92 +107,94 @@ def predict_number(image_path):
     # img_cell = cv2.erode(img_cell, kernel, iterations=1)
 
     _, img_cell = cv2.threshold(img_cell, 200, 255, cv2.THRESH_BINARY)
-
     img_cell = img_cell.reshape((1, 28, 28, 1))
     # print(model.predict(img_cell))
     # cv2.imwrite("img_cell.png", img_cell.reshape((28, 28)))
 
-    # ############ deep learning ################################
-    # (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    #
-    # # shuffle
-    # permutation = np.random.permutation(x_train.shape[0])
-    # x_train = x_train[permutation]
-    # y_train = y_train[permutation]
-    #
-    # # 28*28 -> 784
-    # train_num = 50000  # max 60000
-    # x_train = x_train[:train_num].reshape((-1, 784))
-    # x_test = x_test[:1000].reshape((-1, 784))
-    #
-    # # for i in range(10):
-    # #     cv2.imwrite("{}.png".format(i), x_test[i*100].reshape((28, 28)))
-    #
-    # y_train = to_categorical(y_train[:train_num], num_classes=10)
-    #
-    # y_test = to_categorical(y_test[:1000], num_classes=10)
-    #
-    # mean = np.mean(x_train)
-    # std = np.std(x_train)
-    # x_train = (x_train - mean) / std
-    # x_test = (x_test - mean) / std
-    #
-    # REG = regularizers.l2(1e-4)
-
+    model_file = "mnist_cnn_model.h5"
     model = Sequential()
-    #
-    # model.add(Reshape((28, 28, 1), input_shape=(784,)))
-    #
-    # model.add(Conv2D(32, (3, 3), padding="same", input_shape=(28, 28, 1)))
-    # model.add(Activation("relu"))
-    #
-    # model.add(Conv2D(32, (3, 3), padding="same"))
-    # model.add(Activation("relu"))
-    #
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    #
-    # model.add(Dropout(0.5))
-    #
-    # model.add(Conv2D(64, (3, 3), padding="same"))
-    # model.add(Activation("relu"))
-    #
-    # model.add(Conv2D(64, (3, 3), padding="same"))
-    # model.add(Activation("relu"))
-    #
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Dropout(0.5))
-    #
-    # model.add(Conv2D(128, (3, 3), padding="same"))
-    # model.add(Activation("relu"))
-    #
-    # model.add(Conv2D(128, (3, 3), padding="same"))
-    # model.add(Activation("relu"))
-    #
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Dropout(0.5))
-    #
-    # model.add(Flatten())
-    #
-    # model.add(Dense(100))
-    # model.add(Activation("relu"))
-    #
-    # model.add(Dropout(0.5))
-    #
-    # model.add(Dense(10))
-    # model.add(Activation('softmax'))
-    #
-    # model.compile(loss=categorical_crossentropy,
-    #               optimizer='Adam',
-    #               metrics=['accuracy'])
-    #
-    # batch_size = 200
-    # total_epoch = 50
-    # log = model.fit(x_train, y_train,
-    #                 batch_size=batch_size,
-    #                 epochs=total_epoch,
-    #                 verbose=1)
-    #
-    # model.save("mnist_model.h5")
+
+    if not os.path.exists(model_file):
+        # ########### deep learning ################################
+        (x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+        # shuffle
+        permutation = np.random.permutation(x_train.shape[0])
+        x_train = x_train[permutation]
+        y_train = y_train[permutation]
+
+        # 28*28 -> 784
+        train_num = 50000  # max 60000
+        x_train = x_train[:train_num].reshape((-1, 784))
+        x_test = x_test[:1000].reshape((-1, 784))
+
+        # for i in range(10):
+        #     cv2.imwrite("{}.png".format(i), x_test[i*100].reshape((28, 28)))
+
+        y_train = to_categorical(y_train[:train_num], num_classes=10)
+
+        y_test = to_categorical(y_test[:1000], num_classes=10)
+
+        mean = np.mean(x_train)
+        std = np.std(x_train)
+        x_train = (x_train - mean) / std
+        x_test = (x_test - mean) / std
+
+        REG = regularizers.l2(1e-4)
+
+        model.add(Reshape((28, 28, 1), input_shape=(784,)))
+
+        model.add(Conv2D(32, (3, 3), padding="same", input_shape=(28, 28, 1)))
+        model.add(Activation("relu"))
+
+        model.add(Conv2D(32, (3, 3), padding="same"))
+        model.add(Activation("relu"))
+
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Dropout(0.5))
+
+        model.add(Conv2D(64, (3, 3), padding="same"))
+        model.add(Activation("relu"))
+
+        model.add(Conv2D(64, (3, 3), padding="same"))
+        model.add(Activation("relu"))
+
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.5))
+
+        model.add(Conv2D(128, (3, 3), padding="same"))
+        model.add(Activation("relu"))
+
+        model.add(Conv2D(128, (3, 3), padding="same"))
+        model.add(Activation("relu"))
+
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.5))
+
+        model.add(Flatten())
+
+        model.add(Dense(100))
+        model.add(Activation("relu"))
+
+        model.add(Dropout(0.5))
+
+        model.add(Dense(10))
+        model.add(Activation('softmax'))
+
+        model.compile(loss=categorical_crossentropy,
+                      optimizer='Adam',
+                      metrics=['accuracy'])
+
+        batch_size = 200
+        total_epoch = 50
+        log = model.fit(x_train, y_train,
+                        batch_size=batch_size,
+                        epochs=total_epoch,
+                        verbose=1)
+
+        model.save("mnist_model.h5")
+
     model = load_model("mnist_cnn_model.h5")
 
     result = np.argmax(model.predict(img_cell))
@@ -204,7 +206,7 @@ def get_ocr_result_list():
     ocr_result_list = []
 
     png_path_list = glob.glob("./cell_img/*.png")
-    now_row = 1
+    now_row = '1'
     row_list = []
     for png_path in sorted(png_path_list):
         row, col, bool_val = png_path[-9:].replace(".png", "").split("_")
@@ -213,10 +215,12 @@ def get_ocr_result_list():
             row_list = []
             now_row = row
 
+        # 文字が書かれている場合は、数字予測を実施
         if bool_val == 't':
             row_list.append(str(predict_number(png_path)))
         else:
             row_list.append('.')
+
     # last row append
     ocr_result_list.append(row_list)
 

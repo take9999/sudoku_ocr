@@ -1,0 +1,90 @@
+body {
+    /* 全画面中央に背景画像を表示 */
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    font-family: 'Verdana';
+    margin: 0;
+    padding: 0;
+}
+
+.frame {
+    /* 中央寄せ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: calc(100vh - 20px);
+}
+
+.num_table {
+    /* テーブルの設定 */
+    table-layout: fixed;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: solid 4px #555;
+    opacity: .9;
+}
+
+.num_table td {
+    /* テーブルセルの設定 */
+    background-color: rgba(255,255,255,.7);
+    border: solid 2px #555;
+    color: #555;
+    font-size: 100%;
+    font-weight: bold;
+    text-align: center;
+    width: 50px;
+    height: 50px;
+}
+
+.num_table td:nth-of-type(3n+1) {
+    /* 3列ごとに太線を引く */
+    border-left: solid 4px #555;
+}
+
+.num_table tr:nth-child(3n+1) {
+    /* 3行ごとに太線を引く */
+    border-top: solid 4px #555;
+}
+
+.num_table .hole {
+    /* 穴空きセルの通常時デザイン */
+    background-color: rgba(192,255,255,.7);
+    color: #00f;
+}
+
+.num_table .hole #edit {
+    /* 穴空きセルの編集中デザイン */
+    background-color: transparent;
+    color: #00f;
+    font-family: 'Verdana';
+    font-size: 100%;
+    font-weight: bold;
+    text-align: center;
+    width: 40px;
+    height: 40px;
+}
+
+#canvas {
+    /* 紙吹雪用 */
+    display: none;
+    position: absolute;
+    top: 0;
+}
+
+.box {
+    width: 500px;
+    height: 500px;
+    display: inline-block;
+    vertical-align: top;
+}
+.box img {
+    max-width: 100%;
+    height: auto;
+}
+.box table {
+    max-width: 100%;
+    height: auto;
+}

@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>ナンプレ！</title>
+    <title>ナンプレ</title>
     <link href="/static/css/style.css" rel="stylesheet">
 </head>
 
@@ -14,13 +14,13 @@
             <input type=submit value=Upload>
         </p>
     </form>
-    <!-- 解答を取得 -->
-    <form method=post action="/solve">
-        <p>
-            <input type=submit value="解答を取得">
-        </p>
-    </form>
+
     <div id="app" class="top_div">
+        <!-- 解答を取得 -->
+        <div>
+            <button @click="clickSolve">解答を取得</button>
+        </div>
+
         <div id="img_div" class="box">
             <div>
                 <caption class="caption">アップロードした画像</caption>
