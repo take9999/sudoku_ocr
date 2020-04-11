@@ -33,38 +33,44 @@ new Vue({
         masks: masks,
         isEdit: isEdit,
         isClear: isClear,
-        progress: progress
-    },
-    mounted() {
-        // テーブル初期化
-        cells.length = 0;
-        masks.length = 0;
-
-        axios.get('/get_ocr_text')
-            .then(response => {
-                console.log('status:', response.status); // 200
-                console.log('body:', response.data);     // response body.
-
-                this.progress = response.data[99];
-
-                if (is_not_Empty(response.data)) {
-                    for (let i=1; i<=9; i++){
-                        cells.push(response.data[i]);
-                    }
-                }
-
-                // 穴空けマスク作成(全てのマスを編集可能にする)
-                for (let i = 0; i < 9; i++) {
-                    masks.push(new Array(9));
-                    for (let j = 0; j < 9; j++) {
-                        masks[i][j] = 'X';
-                    }
-                }
-        }).catch(err => {
-            console.log('err:', err);
-        });
+        progress: progress,
+        updateOCRTimer: null,
+        compUpdate: false
     },
     methods: {
+        // OCR結果の取得
+        updateOCR: function(event) {
+            var self = this;
+            if (self.compUpdate == false) {
+                axios.get('/get_ocr_text')
+                    .then(response => {
+                        console.log('status:', response.status); // 200
+                        console.log('body:', response.data);     // response body.
+
+                        self.progress = response.data[99];
+                        if (self.progress == 100) {
+                            // response.dataが存在する場合
+                            if (is_not_Empty(response.data)) {
+                                for (let i=1; i<=9; i++){
+                                    self.cells.push(response.data[i]);
+                                }
+                            }
+                            // progressが100になった時、1回だけ画面更新
+                            self.compUpdate = true
+                        }
+
+                        // 穴空けマスク作成(全てのマスを編集可能にする)
+                        for (let i = 0; i < 9; i++) {
+                            self.masks.push(new Array(9));
+                            for (let j = 0; j < 9; j++) {
+                                self.masks[i][j] = 'X';
+                            }
+                        }
+                }).catch(err => {
+                    console.log('err:', err);
+                });
+            }
+        },
         // 穴空きセルがクリックされたとき
         clickCell: function(event) {
             // セル番地を取得
@@ -137,5 +143,14 @@ new Vue({
                 console.log(error);
             });
         }
+    },
+    mounted() {
+        this.cells.length = 0;
+        this.masks.length = 0;
+        this.updateOCR();
+        this.updateOCRTimer = setInterval(this.updateOCR, 5000);
+    },
+    destroyed() {
+        clearInterval(this.updateOCRTimer);
     }
 })
