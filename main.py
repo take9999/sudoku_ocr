@@ -95,9 +95,8 @@ def get_ocr_text():
     result_json = {}
 
     # 処理進捗度を返す
-    png_path_list = glob.glob("./cell_img/*.png")
+    png_path_list = glob.glob("./cell_img/*_finish.png")
     progress = int(len(png_path_list)/81 * 100)
-
     result_json[99] = progress
 
     if os.path.exists(ocr_file_path):

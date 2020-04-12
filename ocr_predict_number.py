@@ -224,6 +224,10 @@ def get_ocr_result_list():
         else:
             row_list.append('.')
 
+        # OCR完了した画像の名前を変更
+        renamed_path = png_path.replace(".png", "_finish.png")
+        os.rename(png_path, renamed_path)
+
     # last row append
     ocr_result_list.append(row_list)
 

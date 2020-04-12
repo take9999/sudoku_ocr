@@ -37,6 +37,11 @@ new Vue({
         updateOCRTimer: null,
         compUpdate: false
     },
+    computed: {
+        calcStyle: function() {
+            return('width: ' + this.progress + '%');
+        }
+    },
     methods: {
         // OCR結果の取得
         updateOCR: function(event) {
