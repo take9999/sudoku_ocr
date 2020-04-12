@@ -196,9 +196,9 @@ def predict_number(image_path):
                         epochs=total_epoch,
                         verbose=1)
 
-        model.save("mnist_model.h5")
+        model.save(model_file)
 
-    model = load_model("mnist_cnn_model.h5")
+    model = load_model(model_file)
 
     result = np.argmax(model.predict(img_cell))
     print(result)
