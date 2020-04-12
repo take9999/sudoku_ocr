@@ -88,3 +88,21 @@ body {
     max-width: 100%;
     height: auto;
 }
+.progress {
+    margin-bottom: 10px;
+}
+.top_div {
+    margin-top: 10px;
+}
+.form-buttons {
+    margin-top: 10px;
+}
+.custom-file {
+  max-width: 20rem;
+  overflow: hidden;
+  float: left;
+  margin-right: 10px;
+}
+.custom-file-label {
+  white-space: nowrap;
+}

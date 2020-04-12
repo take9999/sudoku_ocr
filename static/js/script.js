@@ -1,5 +1,8 @@
 // https://qiita.com/Kazuya_Murakami/items/f5ef5fed850b8b9e7a81
 
+// bs custom file input
+bsCustomFileInput.init()
+
 function is_not_Empty(obj){
   return Object.keys(obj).length;
 }
