@@ -5,6 +5,7 @@
     <title>ナンプレ解読アプリ</title>
     <link rel="stylesheet" type="text/css" href="/static/css/style.css" >
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <link rel="shortcut icon" href="#" />
 </head>
 
 <body>
@@ -17,29 +18,32 @@
       </div>
     </nav>
 
-    <div class="container-fluid">
+    <div id="app" class="top_div">
+        <div class="container-fluid">
 
-        <!-- ナンプレ画像のアップロード&解答を取得ボタン -->
-        <form method=post action="/upload" enctype = multipart/form-data>
-            <div class="custom-file">
-                <input type="file" class="custom-file-input" id="inputFile" name="file">
-                <label class="custom-file-label" for="inputFile">ファイルを選択</label>
-            </div>
-            <div class="form-buttons">
-                <input class="btn btn-primary" type=submit value="アップロード">
-                <button class="btn btn-success" @click="clickSolve">解答を取得</button>
-            </div>
-        </form>
+            <!-- ボタン類表示 -->
+            <form method=post action="/upload" enctype = multipart/form-data>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="inputFile" name="file">
+                    <label class="custom-file-label" for="inputFile">ファイルを選択</label>
+                </div>
+                <div class="form-buttons">
+                    <input class="btn btn-primary" type="submit" value="アップロード">
+                    <button class="btn btn-success" type="button" @click="clickSolve">解答を取得</button>
+                </div>
+            </form>
 
-        <div id="app" class="top_div">
+            <!-- 画像表示 -->
             <div id="img_div" class="box">
                 <p class="caption">アップロード画像</p>
                 <img src="./images/sudoku.png">
             </div>
+
+            <!-- OCR結果表示 -->
             <div class="box">
                 <p class="caption">画像から読み取ったナンプレ</p>
                 <div class="progress">
-                    <div class="progress-bar progress-bar-striped bg-info" role="progressbar" v-bind:style="calcStyle" v-bind:aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar progress-bar-striped bg-info" role="progressbar" :style="calcStyle" :aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
                 <div class="div-num-table">
                     <table class="num_table">

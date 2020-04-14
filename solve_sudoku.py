@@ -23,7 +23,12 @@ def set_num(vdata, idx):
         pprint.pprint(vdata)
         # 結果のファイル書き込み
         with open(ocr_file_path, mode="w") as wf:
-            wf.write(vdata)
+            for row in vdata:
+                tmp_string = ""
+                for r in row:
+                    tmp_string += (str(r) + ",")
+                wf.write(tmp_string.rstrip(","))
+                wf.write("\n")
         return True
 
     # 空白があるか調べる --- (*5)

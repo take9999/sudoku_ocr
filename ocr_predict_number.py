@@ -222,7 +222,7 @@ def get_ocr_result_list():
         if bool_val == 't':
             row_list.append(str(predict_number(png_path)))
         else:
-            row_list.append('.')
+            row_list.append('')
 
         # OCR完了した画像の名前を変更
         renamed_path = png_path.replace(".png", "_finish.png")

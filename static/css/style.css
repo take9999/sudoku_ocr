@@ -79,6 +79,7 @@ body {
     height: 500px;
     display: inline-block;
     vertical-align: top;
+    margin-top: 10px;
 }
 .box img {
     max-width: 100%;

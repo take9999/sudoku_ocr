@@ -59,33 +59,43 @@ def main_page():
 
 @app.route("/post_solve", methods=["POST"])
 def post_solve():
-    ocr_filename = "ocr_text.txt"
-    ocr_file_path = os.path.join(app.config['TEXT_FOLDER'], ocr_filename)
+    cells = request.json["cells"]
 
     data = []
-    with open(ocr_file_path, "rt") as f:
-        for row in f.readlines():
-            row = row.rstrip("\n")
+    return_json = {}
+    if cells is not None:
+        for row in cells:
             r = []
-            if len(row) != 0:
-                for v in row.split(","):
+            for col in row:
+                num = 0
+                if col != "":
                     try:
-                        r.append(int(v.strip()))
+                        num = int(col)
                     except:
-                        r.append(0)
-                data += [r]
+                        pass
+                r.append(num)
+            data += [r]
 
-    print("--- 問題データ ---")
-    pprint.pprint(data)
+        print("--- 問題データ ---")
+        pprint.pprint(data)
 
-    set_num(data, 0)
+        set_num(data, 0)
 
-    ocr_filename = "ocr_text_solve.txt"
-    ocr_file_path = os.path.join(app.config['TEXT_FOLDER'], ocr_filename)
+        # osr_text_solveを読み込み
+        ocr_filename = "ocr_text_solve.txt"
+        ocr_file_path = os.path.join(app.config['TEXT_FOLDER'], ocr_filename)
+        with open(ocr_file_path, mode="r") as rf:
+            data = rf.readlines()
 
-    # TODO solveファイルを読んで、listを画面に返して表示する処理
+        # dataを整形
+        for i, d in enumerate(data):
+            row_list = []
+            d = d.rstrip("\n")
+            for num in d.split(","):
+                row_list.append(str(num))
+            return_json[i+1] = row_list
 
-    return 0
+    return jsonify(return_json)
 
 
 @app.route("/get_ocr_text", methods=["GET"])
@@ -103,7 +113,7 @@ def get_ocr_text():
         with open(ocr_file_path, mode="r") as rf:
             i = 1
             for read_line in rf.readlines():
-                if len(read_line) == 18:
+                if len(read_line) >= 9:
                     result_json[i] = read_line.replace("\n", "").split(",")
                     i = i + 1
             print(result_json)

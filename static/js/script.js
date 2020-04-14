@@ -48,7 +48,7 @@ new Vue({
     methods: {
         // OCR結果の取得
         updateOCR: function(event) {
-            var self = this;
+            let self = this;
             if (self.compUpdate == false) {
                 axios.get('/get_ocr_text')
                     .then(response => {
@@ -141,11 +141,19 @@ new Vue({
         },
         //解答を取得ボタンが押されたとき
         clickSolve: function(event){
+            let self = this;
             axios.post('/post_solve', {
-                cells: cells
+                cells: self.cells
             })
             .then(function (response) {
                 console.log(response);
+                // response.dataが存在する場合
+                if (is_not_Empty(response.data)) {
+                    self.cells.length = 0;
+                    for (let i=1; i<=9; i++){
+                        self.cells.push(response.data[i]);
+                    }
+                }
             })
             .catch(function (error) {
                 console.log(error);
